@@ -1,5 +1,5 @@
-name := "lab04a"
-version := "0.1"
+name := "filter"
+version := "1.0"
 scalaVersion := "2.11.12"
 
 assemblyJarName in assembly := "filter_2.11-1.0.jar"

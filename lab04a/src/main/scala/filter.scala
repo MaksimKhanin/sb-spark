@@ -10,6 +10,10 @@ object filter {
     val offset = spark.conf.get("spark.filter.offset")
     val output_dir_prefix = spark.conf.get("spark.filter.output_dir_prefix")
 
+    println(topic_name)
+    println(offset)
+    println(output_dir_prefix)
+
     val schema = StructType(
       List(
         StructField("event_type", StringType, nullable = true),
@@ -37,8 +41,11 @@ object filter {
         .cast("timestamp"), "yyyyMMDD").cast("string"))
       .withColumn("date", regexp_replace(col("date"), lit("-"), lit("")))
 
-    parsedSdf.write.partitionBy("event_type","date").parquet(output_dir_prefix)
+    val buys = parsedSdf.filter(col("event_type") === "buy")
+    val views = parsedSdf.filter(col("event_type") === "view")
 
+    views.write.partitionBy("date").json(output_dir_prefix + "/view")
+    buys.write.partitionBy("date").json(output_dir_prefix + "/buy")
     spark.stop()
 
   }
