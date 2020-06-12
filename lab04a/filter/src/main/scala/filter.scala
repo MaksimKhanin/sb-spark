@@ -1,9 +1,9 @@
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.functions._
+
 
 object filter {
-
-  import org.apache.spark.sql.SparkSession
-  import org.apache.spark.sql.types._
-  import org.apache.spark.sql.functions._
 
   def main(args: Array[String]) {
     val spark = SparkSession.builder().appName(name = "Khanin.Lab04a").getOrCreate()
