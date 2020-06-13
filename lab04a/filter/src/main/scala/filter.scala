@@ -12,6 +12,8 @@ object filter {
     val offset = spark.conf.get("spark.filter.offset")
     val output_dir_prefix = spark.conf.get("spark.filter.output_dir_prefix")
 
+    val offsetNum = if (offset == "earliest") "earliest" else s"""{"$topic_name":{"0":$offset}}"""
+
     println(topic_name)
     println(offset)
     println(output_dir_prefix)
@@ -27,10 +29,11 @@ object filter {
       )
     )
 
+
     val kafkaParams = Map(
       "kafka.bootstrap.servers" -> "10.0.1.13:6667",
       "subscribe" -> topic_name,
-      "startingOffsets" -> offset,
+      "startingOffsets" -> offsetNum,
       "maxOffsetsPerTrigger" -> "5"
     )
 
