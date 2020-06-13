@@ -1,4 +1,4 @@
 *.jar
 .idea
 /target/*
-/lab04a/*
+lab04a/*
