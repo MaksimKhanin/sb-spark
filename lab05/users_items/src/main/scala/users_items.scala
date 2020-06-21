@@ -1,8 +1,5 @@
 import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.FileSystem
-import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.functions._
 
 object users_items {
@@ -30,34 +27,15 @@ object users_items {
 
     val views = spark.read.json(confInputDir + "/view/")
     val buys = spark.read.json(confInputDir + "/buy/")
-
     val uidDates = views.select("uid", "date").union(buys.select("uid", "date"))
-
     val maxInputDate= uidDates.agg(max("date")).collect()(0)(0).toString
-
     val users = uidDates.select("uid").distinct
-
     val buyMatrix = dfToMatrix(buys.withColumn("item_id", normString(col("item_id"))), "uid", "item_id", "buy_")
     val viewsMatrix = dfToMatrix(views.withColumn("item_id", normString(col("item_id"))), "uid", "item_id", "view_")
-
-    val fs = FileSystem.get(new Configuration())
-    val status = fs.listStatus(new Path(confOutputDir))
-
     val input_matrix = users.join(buyMatrix, Seq("uid"), "left").join(viewsMatrix, Seq("uid"), "left").na.fill(0)
 
-    val digitsMatch = "(\\d{8})".r
 
-    val fileList = status
-      .map(x=> digitsMatch.findFirstIn(x.getPath.toString).getOrElse(None))
-      .filter(_ != None).map(_.toString)
-
-    def maxDate(date1: String, date2: String): String = if (date1 > date2) date1 else date2
-
-
-
-    val maxOutDate = fileList.reduceOption(maxDate).getOrElse("0")
     println(s"maxInputDate param is $maxInputDate")
-    println(s"MaxOutData param is $maxOutDate")
 
     if (confUpdate != 1)
     {
@@ -68,13 +46,11 @@ object users_items {
     else
     {
       println(s"confUpdate == 1 param is used")
-      val previousMatrix = spark.read.parquet(confOutputDir+"/"+maxOutDate)
+      val previousMatrix = spark.read.parquet(confOutputDir+"/"+maxInputDate)
 
       val newMatrix = previousMatrix.union(input_matrix).na.fill(0)
-      val newOutputDir = if (maxOutDate != "0") confOutputDir+"/" + maxDate(maxOutDate, maxInputDate) else confOutputDir+"/"+maxInputDate
+      val newOutputDir = confOutputDir+"/"+maxInputDate
       println(s"MaxOutData param is $newOutputDir")
-      if (fs.exists(new Path(newOutputDir)))
-        fs.delete(new Path(newOutputDir), true)
 
       newMatrix.write.parquet(newOutputDir)
       println(s"Matrix has been written")
