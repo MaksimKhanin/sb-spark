@@ -41,6 +41,8 @@ object users_items {
     val viewsMatrix = dfToMatrix(views.withColumn("item_id", normString(col("item_id"))), "uid", "item_id", "view_")
 
     val fs = if(confOutputDir.contains("file:/")) FileSystem.getLocal(new Configuration()) else FileSystem.get(new Configuration())
+    if (!fs.exists(new Path(confOutputDir)))
+      fs.mkdirs(new Path(confOutputDir))
     val status = fs.listStatus(new Path(confOutputDir))
 
     val input_matrix = users.join(buyMatrix, Seq("uid"), "left").join(viewsMatrix, Seq("uid"), "left").na.fill(0)
@@ -53,8 +55,7 @@ object users_items {
 
     def maxDate(date1: String, date2: String): String = if (date1 > date2) date1 else date2
 
-    if (!fs.exists(new Path(confOutputDir)))
-      fs.mkdirs(new Path(confOutputDir))
+
 
     val maxOutDate = fileList.reduceOption(maxDate).getOrElse("0")
     println(s"maxInputDate param is $maxInputDate")
