@@ -62,16 +62,16 @@ object users_items {
     if (confUpdate != 1)
     {
       println(s"confUpdate != 0 param is used")
-      input_matrix.write.parquet(confOutputDir+maxInputDate)
+      input_matrix.write.parquet(confOutputDir+"/"+maxInputDate)
       println(s"Matrix has been written")
     }
     else
     {
       println(s"confUpdate == 1 param is used")
-      val previousMatrix = spark.read.parquet(confOutputDir+maxOutDate)
+      val previousMatrix = spark.read.parquet(confOutputDir+"/"+maxOutDate)
 
       val newMatrix = previousMatrix.union(input_matrix).na.fill(0)
-      val newOutputDir = if (maxOutDate != "0") confOutputDir + maxDate(maxOutDate, maxInputDate) else confOutputDir+maxInputDate
+      val newOutputDir = if (maxOutDate != "0") confOutputDir+"/" + maxDate(maxOutDate, maxInputDate) else confOutputDir+"/"+maxInputDate
       println(s"MaxOutData param is $newOutputDir")
       if (fs.exists(new Path(newOutputDir)))
         fs.delete(new Path(newOutputDir), true)
