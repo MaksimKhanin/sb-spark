@@ -18,6 +18,13 @@ object users_items {
         .groupBy(groupColNm).pivot(pivotColNm).count()
     }
 
+    def expandCols(myCols: Set[String], allCols: Set[String]) = {
+      allCols.toList.map(x => x match {
+        case x if myCols.contains(x) => col(x)
+        case _ => lit(null).as(x)
+      })
+    }
+
     val spark = SparkSession.builder().appName(name = "Khanin.Lab05").getOrCreate()
     spark.sparkContext.setLogLevel("ERROR")
     val confOutputDir = spark.conf.get("spark.users_items.output_dir")
@@ -71,14 +78,22 @@ object users_items {
     {
       println(s"confUpdate == 1 param is used")
       val previousMatrix = spark.read.parquet(confOutputDir+"/"+maxOutDate)
+      val newCols = input_matrix.columns.toSet
+      val prevCols = previousMatrix.columns.toSet
+      val total = newCols ++ prevCols
 
-      val newMatrix = previousMatrix.union(input_matrix).na.fill(0)
+      val newMatrix = previousMatrix
+        .select(expandCols(prevCols, total):_*)
+        .union(input_matrix.select(expandCols(newCols, total):_*))
+        .na.fill(0)
+
       val newOutputDir = if (maxOutDate != "0") confOutputDir+"/" + maxDate(maxOutDate, maxInputDate) else confOutputDir+"/"+maxInputDate
       println(s"MaxOutData param is $newOutputDir")
       if (fs.exists(new Path(newOutputDir)))
         fs.delete(new Path(newOutputDir), true)
 
       newMatrix.write.parquet(newOutputDir)
+
       println(s"Matrix has been written")
     }
     spark.stop()
