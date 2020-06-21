@@ -42,7 +42,7 @@ object filter {
     val parsedSdf = raw_kafka.select(col("value").cast(StringType).as("json"))
       .select(from_json(col("json"), schema).as("data"))
       .select("data.*")
-      .withColumn("date", to_date((col("timestamp")/1000)
+      .withColumn("date", to_date(((col("timestamp")/1000)-3600)
         .cast("timestamp"), "yyyyMMDD").cast("string"))
       .withColumn("date", regexp_replace(col("date"), lit("-"), lit("")))
 

@@ -19,7 +19,7 @@ object users_items {
     }
 
     val spark = SparkSession.builder().appName(name = "Khanin.Lab05").getOrCreate()
-
+    spark.sparkContext.setLogLevel("ERROR")
     val confOutputDir = spark.conf.get("spark.users_items.output_dir")
     val confInputDir = spark.conf.get("spark.users_items.input_dir")
     val confUpdate = if (spark.conf.get("spark.users_items.update") == "1") 1 else 0
@@ -79,6 +79,7 @@ object users_items {
       newMatrix.write.parquet(newOutputDir)
       println(s"Matrix has been written")
     }
+    spark.stop()
 
 
   }
