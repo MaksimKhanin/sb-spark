@@ -28,8 +28,8 @@ object users_items {
     println(s"confInputDir param is $confInputDir")
     println(s"confOutputDir param is $confOutputDir")
 
-    val views = spark.read.json(confInputDir + "view/")
-    val buys = spark.read.json(confInputDir + "buy/")
+    val views = spark.read.json(confInputDir + "/view/")
+    val buys = spark.read.json(confInputDir + "/buy/")
 
     val uidDates = views.select("uid", "date").union(buys.select("uid", "date"))
 
