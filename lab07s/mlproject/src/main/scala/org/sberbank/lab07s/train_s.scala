@@ -4,7 +4,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.ml.feature.CountVectorizer
 import org.apache.spark.ml.Pipeline
 
-object train {
+object train_s {
   def main(args: Array[String]): Unit = {
 
     val spark = SparkSession.builder().appName(name = "Khanin.Lab07Strain").getOrCreate()

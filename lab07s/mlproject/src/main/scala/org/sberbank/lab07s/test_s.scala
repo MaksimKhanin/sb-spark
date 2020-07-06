@@ -3,7 +3,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.ml.PipelineModel
 import org.apache.spark.sql.types._
 
-object test {
+object test_s {
   def main(args: Array[String]): Unit = {
 
     val spark = SparkSession.builder().appName(name = "Khanin.Lab07Stest").getOrCreate()
